@@ -26,14 +26,15 @@ int main() {
   };
   uint8_t num_sectors = sizeof(sectors) / sizeof(sectors[0]);
 
-  Circuit *myCircuit = create_circuit("Circuit 1", sectors, num_sectors);
+  Circuit *myCircuit = create_circuit("Circuit 1", sectors, num_sectors, 30, 20);
   if (myCircuit == NULL) {
     printf("Failed to create circuit\n");
     return 1;
   }
 
-  for (int i = 0; i < 30; ++i) {
-    float_t lap_duration = calculate_lap_duration(&myRacingCar, myCircuit);
+  for (int i = 0; i < myCircuit->total_laps; ++i) {
+    bool pitstop = (i % 10 == 0) && i > 0;
+    float_t lap_duration = calculate_lap_duration(&myRacingCar, myCircuit, pitstop);
     printf("[%s] Lap [%d] duration for %s: %f seconds\n", myCircuit->name, i + 1,
            myCar.scuderia, lap_duration);
   }

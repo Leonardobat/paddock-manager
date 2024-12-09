@@ -15,10 +15,9 @@ add_executable(paddock-manager src/main.c)
 target_link_libraries(paddock-manager PRIVATE paddock_manager_lib)
 
 # Tests Configuration
-# Add the Unity submodule directory
-add_subdirectory(Unity)
-# Enable testing
-enable_testing()
-# Add the test directory
-add_subdirectory(test)
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(Unity)
+    add_subdirectory(test)
+endif()
 

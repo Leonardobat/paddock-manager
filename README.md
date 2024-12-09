@@ -15,6 +15,6 @@ I wil keep the dependecies at the bare minimum, all the dependencies will be onl
 - [] Make drivers skills influenciate on the lap timing
 - [x] Add tyres options and tyres wearing
 - [x] Make tyres influenciate on the sectors timing
-- [] Add a simple pitstop 
-- [] Create a full race integration test with only the player car
+- [x] Add a simple pitstop 
+- [x] Create a full race integration test with only the player car
 - [] Create random oponents for the race and implement a simple AI.

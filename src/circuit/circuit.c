@@ -2,8 +2,8 @@
 #include <string.h>
 #include "circuit/circuit.h"
 
-Circuit* create_circuit(const char* name, Sector* sectors, uint8_t num_sectors) {
-    if (name == NULL || sectors == NULL || num_sectors == 0) {
+Circuit* create_circuit(const char* name, Sector* sectors, uint8_t num_sectors, uint8_t total_laps, uint8_t pitstop_duration) {
+    if (name == NULL || sectors == NULL || num_sectors == 0 || total_laps == 0 || pitstop_duration == 0) {
         return NULL; 
     }
 
@@ -18,6 +18,8 @@ Circuit* create_circuit(const char* name, Sector* sectors, uint8_t num_sectors) 
 
     new_circuit->psectors = sectors;
     new_circuit->num_sectors = num_sectors;
+    new_circuit->total_laps = total_laps;
+    new_circuit->pitstop_duration = pitstop_duration;
 
     return new_circuit;
 }

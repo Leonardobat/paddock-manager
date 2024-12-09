@@ -66,7 +66,7 @@ float_t calculate_tires_factor(RacingTyre *tyre) {
   return tyre->grip_level / 100;
 }
 
-float_t calculate_lap_duration(RacingCar *car, Circuit *circuit) {
+float_t calculate_lap_duration(RacingCar *car, Circuit *circuit, bool pitstop) {
   float_t total_duration = 0;
 
   if (car == NULL || circuit == NULL || circuit->psectors == NULL) {
@@ -74,15 +74,22 @@ float_t calculate_lap_duration(RacingCar *car, Circuit *circuit) {
     return -1.0; // Return a negative value to indicate an error
   }
 
-  for (uint8_t i = 0; i < circuit->num_sectors; ++i) {
-    Sector *current_sector = &(circuit->psectors[i]);
+  for (uint8_t sector_index = 0; sector_index < circuit->num_sectors;
+       ++sector_index) {
+    Sector *current_sector = &(circuit->psectors[sector_index]);
     if (current_sector == NULL) {
-      printf("Error: Invalid sector at index %d\n", i);
+      printf("Error: Invalid sector at index %d\n", sector_index);
       continue; // Skip this sector and continue with the next one
     }
 
     float_t speed = calculate_sector_speed(car, current_sector);
     float_t duration = current_sector->length_in_meters / speed;
+    if (pitstop && sector_index == 0) {
+      duration +=
+          circuit->pitstop_duration; // Add the pitstop time to the first sector
+      car->tyre->wear_level =
+          100; // TODO: Implement pitstop properly actually changing the tyre
+    }
     total_duration += duration;
   }
 
