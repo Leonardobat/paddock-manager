@@ -1,10 +1,12 @@
 #include "car/car.h"
 #include "circuit/circuit.h"
+#include "database/database.h"
 #include "race_runner/racing_tyre.h"
 #include "race_runner/runner.h"
 #include "sqlite3.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
   Car myCar = {.scuderia = "Scuderia Giordano",
@@ -51,34 +53,18 @@ int main() {
   int rc;
 
   // Open database
-  rc = sqlite3_open("test.db", &db);
-  if (rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    return (1);
-  }
-
-  // Create table
-  const char *sql =
-      "CREATE TABLE IF NOT EXISTS cars (id INTEGER PRIMARY KEY, name TEXT, scuderia TEXT)";
-  rc = sqlite3_prepare_v2(db, sql, -1, &pStmt, 0);
-  if (rc != SQLITE_OK) {
-    fprintf(stderr, "SQLite3 prepare error: %s\n", sqlite3_errmsg(db));
-    return (1);
-  }
-
-  rc = sqlite3_step(pStmt);
-  if (rc != SQLITE_OK) {
-    fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(db));
-    return (1);
-  }
-  sqlite3_finalize(pStmt);
+  connect_to_database(":memory:", &db);
+  migrate_tables(db);
 
   // Insert a record
-  sql = "INSERT INTO cars (name, scuderia) VALUES (?, ?)";
+  const char *sql = "INSERT INTO cars (scuderia, max_speed, acceleration, "
+                    "downforce) VALUES (?, ?, ?, ?)";
   rc = sqlite3_prepare_v2(db, sql, -1, &pStmt, 0);
   if (rc == SQLITE_OK) {
-    sqlite3_bind_text(pStmt, 1, "MyRaceCar", -1, SQLITE_STATIC);
-    sqlite3_bind_text(pStmt, 2, myCar.scuderia, -1, SQLITE_STATIC);
+    sqlite3_bind_text(pStmt, 1, myCar.scuderia, -1, SQLITE_STATIC);
+    sqlite3_bind_double(pStmt, 2, myCar.max_speed);
+    sqlite3_bind_int(pStmt, 3, myCar.acceleration);
+    sqlite3_bind_int(pStmt, 4, myCar.downforce);
     sqlite3_step(pStmt);
   }
   sqlite3_finalize(pStmt);
@@ -89,14 +75,18 @@ int main() {
   if (rc == SQLITE_OK) {
     while (sqlite3_step(pStmt) == SQLITE_ROW) {
       int id = sqlite3_column_int(pStmt, 0);
-      const unsigned char *name = sqlite3_column_text(pStmt, 1);
-      const unsigned char *scuderia = sqlite3_column_text(pStmt, 2);
-      printf("Car: ID = %d, Name = %s, Scuderia = %s\n", id, name, scuderia);
+      const unsigned char *scuderia = sqlite3_column_text(pStmt, 1);
+      double max_speed = sqlite3_column_double(pStmt, 2);
+      int acceleration = sqlite3_column_int(pStmt, 3);
+      int downforce = sqlite3_column_int(pStmt, 4);
+      printf("Car: ID = %d, Scuderia = %s, Max Speed %f, Acceleration %d, "
+             "Downforce %d",
+             id, scuderia, max_speed, acceleration, downforce);
     }
   }
   sqlite3_finalize(pStmt);
 
   // Close database
-  sqlite3_close(db);
+  close_connection(db);
   return 0;
 }
