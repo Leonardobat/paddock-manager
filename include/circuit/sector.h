@@ -3,6 +3,7 @@
 
 #include "sector_type.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 // Define the struct
 typedef struct {
@@ -10,5 +11,7 @@ typedef struct {
     SectorType type;
     uint16_t length_in_meters;
 } Sector;
+
+bool is_valid_sector(const Sector *sector);
 
 #endif // SECTOR_H

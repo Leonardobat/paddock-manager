@@ -1,6 +1,8 @@
 #include "circuit/circuit.h"
 #include "unity.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void setUp(void) {
   // This is run before EACH test
@@ -13,7 +15,7 @@ void tearDown(void) {
 void test_create_circuit_should_truncate_long_name(void) {
   const char *long_name =
       "This is a very long circuit name that exceeds the maximum length";
-  Sector sectors[1] = {{0}}; // Dummy sector
+  Sector* sectors = malloc(3 * sizeof(Sector));
   uint8_t num_sectors = 1;
   uint8_t total_laps = 1;
   uint8_t pitstop_duration = 1;
@@ -31,7 +33,7 @@ void test_create_circuit_should_truncate_long_name(void) {
 
 void test_create_circuit_with_valid_inputs(void) {
   const char *name = "Test Circuit";
-  Sector sectors[3] = {{0}, {0}, {0}}; // Dummy sectors
+  Sector *sectors = malloc(3 * sizeof(Sector)); //dummy sector pointer
   uint8_t num_sectors = 3;
   uint8_t total_laps = 1;
   uint8_t pitstop_duration = 1;

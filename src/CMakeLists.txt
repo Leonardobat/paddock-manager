@@ -17,3 +17,4 @@ target_include_directories(paddock_manager_lib
 
 # Link math library
 target_link_libraries(paddock_manager_lib PRIVATE m)
+target_link_libraries(paddock_manager_lib PRIVATE sqlite3)

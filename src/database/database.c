@@ -2,6 +2,11 @@
 #include <stdio.h>
 
 int connect_to_database(const char *pfilename, sqlite3 **pdatabase_connection) {
+  if (pfilename == NULL || *pfilename == '\0' || pdatabase_connection == NULL) {
+    fprintf(stderr, "Invalid arguments\n");
+    return SQLITE_CANTOPEN;
+  }
+
   int result_code = sqlite3_open(pfilename, pdatabase_connection);
   if (result_code != SQLITE_OK) {
     fprintf(stderr, "Can't open database: %s\n",
