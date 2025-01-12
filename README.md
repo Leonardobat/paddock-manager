@@ -13,7 +13,6 @@ The project, Paddock-Manager, will keep dependencies at a bare minimum, with add
 
 ## Missing Features
 ### MPV - Full Race with AI Runners
-- [] Read circuit data from a sqlite3 table.
 - [] Read driver data from a sqlite3 table.
 - [] Read racing tyre data from a sqlite3 table.
 - [] Make the driver's skills influence the lap timing.
