@@ -1,6 +1,5 @@
 # Get all test files in the current directory
 file(GLOB_RECURSE TEST_SOURCES "test_*.c")
-set(UNITY_EXTENSION_MEMORY ON CACHE BOOL "Compiles Unity with the \"memory\" extension.")
 
 # Create a test executable for each test file
 foreach(TEST_SOURCE ${TEST_SOURCES})

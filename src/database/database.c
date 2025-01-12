@@ -1,4 +1,5 @@
 #include "database/database.h"
+#include <ctype.h>
 #include <stdio.h>
 
 int connect_to_database(const char *pfilename, sqlite3 **pdatabase_connection) {
@@ -20,25 +21,38 @@ int close_connection(sqlite3 *pdatabase_connection) {
 }
 
 int migrate_tables(sqlite3 *pdatabase_connection) {
-  sqlite3_stmt *pStmt;
   const char sql[] = {
     #embed <sql/tables.sql>
   };
 
-  int result_code =
-      sqlite3_prepare_v2(pdatabase_connection, sql, -1, &pStmt, 0);
-  if (result_code != SQLITE_OK) {
-    fprintf(stderr, "SQLite3 prepare error: %s\n",
-            sqlite3_errmsg(pdatabase_connection));
-    return result_code;
+  char *err_msg = 0;
+  const char *tail = sql;
+
+  while (*tail) {
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(pdatabase_connection, tail, -1, &stmt, &tail);
+
+    if (rc != SQLITE_OK) {
+      fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(pdatabase_connection));
+      return rc;
+    }
+
+    if (stmt) {
+      rc = sqlite3_step(stmt);
+      if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Execution failed: %s\n",
+                sqlite3_errmsg(pdatabase_connection));
+        sqlite3_finalize(stmt);
+        return rc;
+      }
+      sqlite3_finalize(stmt);
+    }
+
+    // Skip any whitespace or semicolons between statements
+    while (*tail && (isspace((unsigned char)*tail) || *tail == ';')) {
+      tail++;
+    }
   }
 
-  result_code = sqlite3_step(pStmt);
-  if (result_code != SQLITE_DONE) {
-    fprintf(stderr, "SQL Error: %s\n", sqlite3_errmsg(pdatabase_connection));
-    return result_code;
-  }
-
-  sqlite3_finalize(pStmt);
-  return result_code;
+  return SQLITE_OK;
 }

@@ -7,11 +7,14 @@ int load_scuderia_cars_from_database(char** scuderias, int scuderia_count, Car**
     sqlite3_stmt *stmt;
     int rc;
     int car_count = 0;
-    int i;
+
+    if (scuderia_count == 0) {
+        return 0;
+    }
 
     // Construct the SQL queries using parameter expansion
-    const char *count_sql = "SELECT COUNT(*) FROM cars WHERE scuderia IN (%s)";
-    const char *select_sql = "SELECT id, scuderia, max_speed, acceleration, downforce FROM cars WHERE scuderia IN (%s)";
+    const char *count_sql = "SELECT COUNT(*) FROM cars WHERE scuderia IN (";
+    const char *select_sql = "SELECT id, scuderia, max_speed, acceleration, downforce FROM cars WHERE scuderia IN (";
 
     // Create a memory buffer for the parameter string
     char *params = NULL;
@@ -23,7 +26,7 @@ int load_scuderia_cars_from_database(char** scuderias, int scuderia_count, Car**
     }
 
     // Write the parameter placeholders to the stream
-    for (i = 0; i < scuderia_count; i++) {
+    for (int i = 0; i < scuderia_count; i++) {
         fprintf(stream, "%s?", i > 0 ? "," : "");
     }
     fprintf(stream, ")");
@@ -42,13 +45,12 @@ int load_scuderia_cars_from_database(char** scuderias, int scuderia_count, Car**
     rc = sqlite3_prepare_v2(db, full_count_sql, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(params);
         sqlite3_free(full_count_sql);
         sqlite3_free(full_select_sql);
         return -1;
     }
 
-    for (i = 0; i < scuderia_count; i++) {
+    for (int i = 0; i < scuderia_count; i++) {
         sqlite3_bind_text(stmt, i+1, scuderias[i], -1, SQLITE_STATIC);
     }
 
@@ -84,7 +86,7 @@ int load_scuderia_cars_from_database(char** scuderias, int scuderia_count, Car**
         return -1;
     }
 
-    for (i = 0; i < scuderia_count; i++) {
+    for (int i = 0; i < scuderia_count; i++) {
         sqlite3_bind_text(stmt, i+1, scuderias[i], -1, SQLITE_STATIC);
     }
 

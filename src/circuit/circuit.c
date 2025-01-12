@@ -11,10 +11,10 @@ Circuit *create_circuit(const char *name, Sector *sectors, uint8_t num_sectors,
       pitstop_duration == 0) {
     return NULL;
   }
-    // Check if each sector is valid
+  // Check if each sector is valid
   for (uint8_t i = 0; i < num_sectors; i++) {
     if (!is_valid_sector(&sectors[i])) {
-      return NULL;  // Invalid sector found
+      return NULL; // Invalid sector found
     }
   }
 
@@ -40,7 +40,6 @@ void destroy_circuit(Circuit *circuit) {
   if (circuit != NULL) {
     if (circuit->psectors != NULL) {
       free(circuit->psectors);
-      circuit->psectors = NULL;
     }
     free(circuit);
   }
@@ -78,7 +77,16 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
   }
 
   uint8_t circuit_id = (uint8_t)sqlite3_column_int(stmt_basic, 0);
-  const char *circuit_name = (const char *)sqlite3_column_text(stmt_basic, 1);
+  const unsigned char *temp_circuit_name = sqlite3_column_text(stmt_basic, 1);
+  int name_length = sqlite3_column_bytes(stmt_basic, 1);
+  char *circuit_name = malloc(name_length + 1);
+  if (circuit_name == NULL) {
+    fprintf(stderr, "Error: Memory allocation failed for circuit name\n");
+    sqlite3_finalize(stmt_basic);
+    return SQLITE_NOMEM;
+  }
+  memcpy(circuit_name, temp_circuit_name, name_length);
+  circuit_name[name_length] = '\0'; // Ensure null-termination
   uint8_t num_sectors = (uint8_t)sqlite3_column_int(stmt_basic, 2);
   uint8_t total_laps = (uint8_t)sqlite3_column_int(stmt_basic, 3);
   uint8_t pitstop_duration = (uint8_t)sqlite3_column_int(stmt_basic, 4);
@@ -88,11 +96,12 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
   Sector *psectors = malloc(num_sectors * sizeof(Sector));
   if (psectors == NULL) {
     fprintf(stderr, "Error: Memory allocation failed for sectors\n");
+    free(circuit_name);
     return SQLITE_NOMEM;
   }
 
   const char *sql_sectors =
-      "SELECT value ->> '$.number', "
+      "SELECT value ->> '$.number' as number, "
       "       value ->> '$.type' as type, "
       "       value ->> '$.length_in_meters' as length_in_meters "
       "FROM circuit, json_each(circuit.sectors) "
@@ -106,6 +115,8 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
     fprintf(stderr, "Error preparing sector query for circuit id %d: %s\n", id,
             sqlite3_errmsg(db));
     free(psectors);
+    free(circuit_name);
+
     return result_code;
   }
 
@@ -115,6 +126,8 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
             sqlite3_errmsg(db));
     sqlite3_finalize(stmt_sectors);
     free(psectors);
+    free(circuit_name);
+
     return result_code;
   }
 
@@ -125,7 +138,7 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
         (uint8_t)sqlite3_column_int(stmt_sectors, 0);
     psectors[sector_index].type = (uint8_t)sqlite3_column_int(stmt_sectors, 1);
     psectors[sector_index].length_in_meters =
-        (uint8_t)sqlite3_column_int(stmt_sectors, 2);
+        (uint16_t)sqlite3_column_int(stmt_sectors, 2);
     sector_index++;
   }
 
@@ -135,6 +148,8 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
     fprintf(stderr, "Error reading sectors for circuit id %d: %s\n", id,
             sqlite3_errmsg(db));
     free(psectors);
+    free(circuit_name);
+
     return result_code;
   }
 
@@ -145,16 +160,20 @@ int load_circuit_from_db(uint32_t id, Circuit **pcircuit, sqlite3 *db) {
     return SQLITE_ERROR;
   }
 
+  // Create and return the circuit
   *pcircuit = create_circuit(circuit_name, psectors, num_sectors, total_laps,
                              pitstop_duration);
   if (*pcircuit == NULL) {
     fprintf(stderr, "Error: Failed to create circuit\n");
     free(psectors);
+    free(circuit_name);
+
     return SQLITE_ERROR;
   }
+  free(circuit_name);
 
   (*pcircuit)->id = circuit_id; // Set the circuit ID
-  return result_code;
+  return SQLITE_OK;
 }
 
 int save_circuit_to_db(Circuit *circuit, sqlite3 *db) {
@@ -229,5 +248,5 @@ int save_circuit_to_db(Circuit *circuit, sqlite3 *db) {
   free(sectors_json);
   sqlite3_finalize(stmt);
 
-  return result_code;
+  return SQLITE_OK;
 }
