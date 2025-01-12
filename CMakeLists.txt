@@ -13,8 +13,9 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(libs)
 add_executable(paddock-manager src/main.c)
-target_link_libraries(paddock-manager PRIVATE paddock_manager_lib)
-target_link_libraries(paddock-manager PRIVATE sqlite3)
+target_link_libraries(paddock-manager 
+    PRIVATE paddock_manager_lib
+)
 
 # Tests Configuration
 include(CTest)

@@ -26,8 +26,7 @@ target_include_directories(sqlite3 PUBLIC
 
 # SQLite needed libraries
 find_package(Threads REQUIRED)
-target_link_libraries(sqlite3 PRIVATE Threads::Threads)
-target_link_libraries(sqlite3 PRIVATE m)
+target_link_libraries(sqlite3 PRIVATE Threads::Threads m)
 
 # Define compilation flags
 target_compile_definitions(sqlite3 PRIVATE
