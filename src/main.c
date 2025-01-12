@@ -55,7 +55,7 @@ int main() {
     return 1;
   }
 
-  // Create a racing tyre (assuming this is not stored in the database)
+  // Create a racing tyre (it's not stored in the database yet, so we'll create it here)
   RacingTyre tyre = {
       .name = "Standard Racing Tyre",
       .critical_wear_level = 40,

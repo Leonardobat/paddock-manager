@@ -4,7 +4,7 @@ SQLITE_VERSION="3470200"
 SQLITE_YEAR="2024"
 SQLITE_FILE="sqlite-amalgamation-${SQLITE_VERSION}.zip"
 SQLITE_URL="https://www.sqlite.org/${SQLITE_YEAR}/${SQLITE_FILE}"
-SQLITE_DIR="sqlite3"
+SQLITE_DIR="libs/sqlite3"
 
 # Function to check if SQLite files exist and are valid
 check_sqlite_files() {

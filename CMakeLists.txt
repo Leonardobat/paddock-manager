@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 # Add the main project directories
 add_subdirectory(include)
 add_subdirectory(src)
-add_subdirectory(sqlite3)
+add_subdirectory(libs)
 add_executable(paddock-manager src/main.c)
 target_link_libraries(paddock-manager PRIVATE paddock_manager_lib)
 target_link_libraries(paddock-manager PRIVATE sqlite3)
@@ -19,7 +19,6 @@ target_link_libraries(paddock-manager PRIVATE sqlite3)
 # Tests Configuration
 include(CTest)
 if(BUILD_TESTING)
-    add_subdirectory(Unity)
     add_subdirectory(test)
 endif()
 
