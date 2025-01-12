@@ -3,7 +3,7 @@ project(sqlite3 C)
 ## Download SQLite Almagmation Files if needed
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/sqlite3.c" "${CMAKE_CURRENT_SOURCE_DIR}/sqlite3.h" "${CMAKE_CURRENT_SOURCE_DIR}/sqlite3ext.h"
-    COMMAND bash "${CMAKE_SOURCE_DIR}/download_sqlite.sh"
+    COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/download_sqlite.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Checking and downloading SQLite if necessary"
 )

@@ -4,11 +4,11 @@ SQLITE_VERSION="3470200"
 SQLITE_YEAR="2024"
 SQLITE_FILE="sqlite-amalgamation-${SQLITE_VERSION}.zip"
 SQLITE_URL="https://www.sqlite.org/${SQLITE_YEAR}/${SQLITE_FILE}"
-SQLITE_DIR="libs/sqlite3"
+SQLITE_DIR="./libs/sqlite3"
 
 # Function to check if SQLite files exist and are valid
 check_sqlite_files() {
-    if [ -f "${SQLITE_DIR}/sqlite3.c" ] && [ -f "${SQLITE_DIR}/sqlite3.h" ]; then
+    if [ -f "${SQLITE_DIR}/sqlite3.c" ] && [ -f "${SQLITE_DIR}/sqlite3.h" ] && [ -f "${SQLITE_DIR}/sqlite3ext.h" ]; then
         if sha256sum -c "${SQLITE_DIR}/sqlite3_hash.txt" &>/dev/null; then
             echo "SQLite files are present and valid."
             return 0
@@ -30,7 +30,7 @@ curl -L -o "${SQLITE_FILE}" "${SQLITE_URL}"
 
 # Unzip the file
 echo "Extracting SQLite files..."
-unzip -j "${SQLITE_FILE}" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3.c" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3.h" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3ext.h" -d "${SQLITE_DIR}"
+unzip -j -o "${SQLITE_FILE}" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3.c" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3.h" "sqlite-amalgamation-${SQLITE_VERSION}/sqlite3ext.h" -d "${SQLITE_DIR}"
 
 # Remove the zip file
 rm "${SQLITE_FILE}"
